@@ -15,12 +15,18 @@ class Image
     private :
         unsigned int width;
         unsigned int height;
-        unsigned int filetype;
-        struct Pixel **matrix;
+        int filetype;
+        Pixel **matrix;
 
     public :
         Image(unsigned int filetype, unsigned int width, unsigned int height);
         Image(std::string path);  
+        int findFileType(std::string path);
+        void readJPGAndFillMatrix(std::string path);
+        void readPNGAndFillMatrix(std::string path);
+        Pixel** getRGBMatrix();
+        unsigned int getHeight() { return height; }
+        unsigned int getWidth() { return width; }
         ~Image();
 };
 
