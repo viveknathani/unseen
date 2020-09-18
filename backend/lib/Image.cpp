@@ -66,7 +66,7 @@ void Image::readJPGAndFillMatrix(std::string path)
     jpeg_decompress_struct cinfo;
     jpeg_error_mgr jerr;
     FILE *file;
-    if((file = fopen("sample.jpg", "rb")) == NULL)
+    if((file = fopen(path.c_str(), "rb")) == NULL)
     {
         std::cout << "Error in reading the file." << std::endl;
     }
@@ -111,6 +111,64 @@ void Image::readJPGAndFillMatrix(std::string path)
 
 void Image::readPNGAndFillMatrix(std::string path)
 {
+    FILE *file;
+    if((file = fopen(path.c_str(), "rb")) == NULL)
+    {
+        std::cout << "Error in reading the file." << std::endl;
+    }
+    else 
+    {
+        png_byte colorType, bitDepth;
+        png_bytep *rowPointers;
+        png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+        if(!png) abort();
+        png_infop info = png_create_info_struct(png);
+        if(!info) abort();
+        if(setjmp(png_jmpbuf(png))) abort();
+        png_init_io(png, file);
+        png_read_info(png, info);
+        width = static_cast<unsigned int>(png_get_image_width(png, info));
+        height = static_cast<unsigned int>(png_get_image_height(png, info));
+        matrix = (Pixel **)malloc(height * sizeof(Pixel *));
+        for(unsigned int i = 0; i < height; i++)
+            matrix[i] = (Pixel *)malloc(width * sizeof(Pixel));
+        colorType = png_get_color_type(png, info);
+        bitDepth  = png_get_bit_depth(png, info);
+
+        if(bitDepth == 16) png_set_strip_16(png);
+        if(colorType == PNG_COLOR_TYPE_PALETTE) png_set_palette_to_rgb(png);
+        if(colorType == PNG_COLOR_TYPE_GRAY && bitDepth < 8) png_set_expand_gray_1_2_4_to_8(png);
+        if(png_get_valid(png, info, PNG_INFO_tRNS)) png_set_tRNS_to_alpha(png);
+
+        if(colorType == PNG_COLOR_TYPE_RGB ||
+           colorType == PNG_COLOR_TYPE_GRAY ||
+           colorType == PNG_COLOR_TYPE_PALETTE)
+            png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
+        if(colorType == PNG_COLOR_TYPE_GRAY ||
+           colorType == PNG_COLOR_TYPE_GRAY_ALPHA)
+            png_set_gray_to_rgb(png);   
+
+        png_read_update_info(png, info);
+
+        rowPointers = (png_bytep*)malloc(sizeof(png_bytep) * height);
+        for(unsigned int i = 0; i < height; i++) 
+            rowPointers[i] = (png_byte*)malloc(png_get_rowbytes(png,info));
+
+        png_read_image(png, rowPointers);
+
+        for(unsigned int i = 0; i < height; i++)
+        {
+            png_bytep row = rowPointers[i];
+            for(unsigned int j = 0; j < width; j++)
+            {
+                png_bytep px = &(row[j * 4]);
+                matrix[i][j].r = (int)(px[0]);
+                matrix[i][j].g = (unsigned char)(px[1]);
+                matrix[i][j].b = (unsigned char)(px[2]);
+            }
+        }
+        free(rowPointers);
+    }
 
 }
 
