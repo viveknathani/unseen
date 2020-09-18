@@ -162,7 +162,7 @@ void Image::readPNGAndFillMatrix(std::string path)
             for(unsigned int j = 0; j < width; j++)
             {
                 png_bytep px = &(row[j * 4]);
-                matrix[i][j].r = (int)(px[0]);
+                matrix[i][j].r = (unsigned char)(px[0]);
                 matrix[i][j].g = (unsigned char)(px[1]);
                 matrix[i][j].b = (unsigned char)(px[2]);
             }
