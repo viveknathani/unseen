@@ -275,9 +275,9 @@ void Image::writeJPG(unsigned int givenWidth, unsigned int givenHeight, Pixel **
     imageBuffer = (JSAMPLE *)malloc(3 * givenWidth * givenHeight);
 
     // prepare buffer
-    for(unsigned int i = 0; i < givenWidth; i++)
+    for(unsigned int i = 0; i < givenHeight; i++)
     {
-        for(unsigned int j = 0; j < givenHeight; j++)
+        for(unsigned int j = 0; j < givenWidth; j++)
         {
             *(imageBuffer + p) = givenMatrix[i][j].r;
             p++;
