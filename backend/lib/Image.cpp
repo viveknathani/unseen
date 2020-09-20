@@ -7,9 +7,17 @@
 
 #define show(x) std::cout << #x << " = " << x << std::endl
 
-Image::Image(unsigned int filetype, unsigned int width, unsigned int height)
+Image::Image(int givenFiletype, unsigned int givenWidth, unsigned int givenHeight, Pixel **givenMatrix)
 {
+    switch(givenFiletype)
+    {
+        case 0: writeJPG(givenWidth, givenHeight, givenMatrix);
+                break;
 
+        case 1: writePNG(givenWidth, givenHeight, givenMatrix);
+                break;
+        default: std::cout << "Cannot make an image of this filetype." << std::endl;               
+    }
 }
 
 Image::Image(std::string path)
@@ -172,6 +180,128 @@ void Image::readPNGAndFillMatrix(std::string path)
 
 }
 
+void Image::writeJPG(unsigned int givenWidth, unsigned int givenHeight, Pixel **givenMatrix)
+{
+    int code = 0;
+    FILE *fp = NULL;
+    JSAMPLE * image_buffer;
+    int image_height = givenHeight, image_width = givenWidth;
+    fp = fopen("output.jpg", "wb");
+    if (fp == NULL) {
+        std::cout << "fopen error" << std::endl;
+    }
+    jpeg_compress_struct cinfo;
+    jpeg_error_mgr jerr;
+    JSAMPROW row_pointer[1];
+    int row_stride;
+    cinfo.err = jpeg_std_error(&jerr);
+    jpeg_create_compress(&cinfo);
+    jpeg_stdio_dest(&cinfo, fp);
+    cinfo.image_width = image_width; 	
+    cinfo.image_height = image_height;
+    cinfo.input_components = 3;	
+    cinfo.in_color_space = JCS_RGB; 
+    jpeg_set_defaults(&cinfo);
+    jpeg_set_quality(&cinfo, 100, TRUE);
+    jpeg_start_compress(&cinfo, TRUE);
+    row_stride = image_width * 3;
+    int p = 0;
+    image_buffer = (JSAMPLE *)malloc(3 * image_width * image_height);
+    for(int i = 0; i < image_height; i++)
+    {
+        for(int j = 0; j < image_width; j++)
+        {
+            *(image_buffer + p) = givenMatrix[i][j].r;
+            p++;
+            *(image_buffer + p) = givenMatrix[i][j].g;
+            p++;
+            *(image_buffer + p) = givenMatrix[i][j].b;
+            p++;
+        }
+    }
+
+    while (cinfo.next_scanline < cinfo.image_height)
+    {
+        row_pointer[0] = & image_buffer[cinfo.next_scanline * row_stride];
+        (void) jpeg_write_scanlines(&cinfo, row_pointer, 1);
+    }
+    jpeg_finish_compress(&cinfo);
+    jpeg_destroy_compress(&cinfo);
+    fclose(fp);
+    this->filetype = 1;
+    this->width = 1;
+    this->height = 1;
+    this->matrix = (Pixel **)malloc(this->height * sizeof(Pixel *));
+        for(unsigned int i = 0; i < this->height; i++)
+            matrix[i] = (Pixel *)malloc(this->width * sizeof(Pixel));
+
+}
+
+void Image::writePNG(unsigned int givenWidth, unsigned int givenHeight, Pixel **givenMatrix)
+{
+    FILE *file = NULL;
+    int code = 0;
+    FILE *fp = NULL;
+    png_structp png_ptr = NULL;
+    png_infop info_ptr = NULL;
+    fp = fopen("output.png", "wb");
+    if (fp == NULL) {
+        std::cout << "fopen error" << std::endl;
+    }
+    png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    if (png_ptr == NULL) {
+        fprintf(stderr, "Could not allocate write struct\n");
+        code = 1;
+    }
+
+    // Initialize info structure
+    info_ptr = png_create_info_struct(png_ptr);
+    if (info_ptr == NULL) {
+        fprintf(stderr, "Could not allocate info struct\n");
+        code = 1;
+    }
+
+    if(setjmp(png_jmpbuf(png_ptr))) {
+      fprintf(stderr, "Error during png creation\n");
+      code = 1;
+   }
+
+    png_init_io(png_ptr, fp);
+
+   // Write header (8 bit colour depth)
+   png_set_IHDR(png_ptr, info_ptr, givenWidth, givenHeight,
+         8, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE,
+         PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);  
+    png_write_info(png_ptr, info_ptr);
+
+    png_bytep *rowPointers = (png_bytep*)malloc(sizeof(png_bytep) * givenHeight);
+        for(unsigned int i = 0; i < givenHeight; i++) 
+            rowPointers[i] = (png_byte*)malloc(png_get_rowbytes(png_ptr,info_ptr));
+
+   // Write image data
+   int x, y;
+   for (y=0 ; y<givenHeight ; y++) {
+      png_bytep row = rowPointers[y];
+      for (x=0 ; x<givenWidth; x++) {
+        //unsigned char r = 255, g = 0, b = 0;  
+        png_bytep px = &(row[x * 3]);
+        px[0] = (png_byte)givenMatrix[y][x].r;
+        px[1] = (png_byte)givenMatrix[y][x].g;
+        px[2] = (png_byte)givenMatrix[y][x].b;
+      }
+   }
+    png_set_rows (png_ptr, info_ptr, rowPointers);
+    png_write_png (png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
+   // End write
+   png_write_end(png_ptr, NULL); 
+   this->filetype = 1;
+   this->width = 1;
+   this->height = 1;
+   this->matrix = (Pixel **)malloc(this->height * sizeof(Pixel *));
+    for(unsigned int i = 0; i < this->height; i++)
+        matrix[i] = (Pixel *)malloc(this->width * sizeof(Pixel));
+}
+
 Pixel** Image::getRGBMatrix()
 {
     return matrix;
@@ -180,4 +310,12 @@ Pixel** Image::getRGBMatrix()
 Image::~Image()
 {
    free(matrix);
+}
+
+int main()
+{
+    Image img("sample.jpg");
+    Pixel **testMatrix = img.getRGBMatrix();
+    Image two(0, img.getWidth(), img.getHeight(), testMatrix);
+    return 0;
 }

@@ -19,11 +19,13 @@ class Image
         Pixel **matrix;
 
     public :
-        Image(unsigned int filetype, unsigned int width, unsigned int height);
+        Image(int givenFiletype, unsigned int givenWidth, unsigned int givenHeight, Pixel **givenMatrix);
         Image(std::string path);  
         int findFileType(std::string path);
         void readJPGAndFillMatrix(std::string path);
         void readPNGAndFillMatrix(std::string path);
+        void writeJPG(unsigned int givenWidth, unsigned int givenHeight, Pixel **givenMatrix);
+        void writePNG(unsigned int givenWidth, unsigned int givenHeight, Pixel **givenMatrix);
         Pixel** getRGBMatrix();
         unsigned int getHeight() { return height; }
         unsigned int getWidth() { return width; }
