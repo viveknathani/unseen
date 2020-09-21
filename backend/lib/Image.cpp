@@ -8,15 +8,15 @@
     Constructor that creates an image file with 
     properties specified by the user.
 */
-Image::Image(int givenFiletype, unsigned int givenWidth, unsigned int givenHeight, Pixel **givenMatrix)
+Image::Image(int givenFiletype, unsigned int givenWidth, unsigned int givenHeight, Pixel **givenMatrix, std::string output)
 {
     // Making the file
     switch(givenFiletype)
     {
-        case 0: writeJPG(givenWidth, givenHeight, givenMatrix);
+        case 0: writeJPG(givenWidth, givenHeight, givenMatrix, output);
                 break;
 
-        case 1: writePNG(givenWidth, givenHeight, givenMatrix);
+        case 1: writePNG(givenWidth, givenHeight, givenMatrix, output);
                 break;
         default: std::cout << "Cannot make an image of this filetype." << std::endl;               
     }
@@ -25,6 +25,7 @@ Image::Image(int givenFiletype, unsigned int givenWidth, unsigned int givenHeigh
     this->filetype = givenFiletype;
     this->width = givenWidth;
     this->height = givenHeight;
+    this->isNotACopy = false;
 
     // User already has the matrix, this is not needed. 
     this->matrix = NULL; 
@@ -237,18 +238,24 @@ void Image::readPNGAndFillMatrix(std::string path)
             matrix[i][j].b = static_cast<unsigned char>(px[2]);
         }
     }
+
+    png_read_end(png, NULL);
+    png_destroy_read_struct(&png, &info, NULL);
+    fclose(file);
+    for(unsigned int i = 0; i < height; i++) 
+        free(rowPointers[i]);
     free(rowPointers);
 }
 
 /*
    Function that writes a JPEG file with given properties.
 */
-void Image::writeJPG(unsigned int givenWidth, unsigned int givenHeight, Pixel **givenMatrix)
+void Image::writeJPG(unsigned int givenWidth, unsigned int givenHeight, Pixel **givenMatrix, std::string output)
 {
     int code = 0;
     FILE *fp = NULL;
     JSAMPLE *imageBuffer;
-    fp = fopen("output.jpg", "wb");
+    fp = fopen(output.c_str(), "wb");
     if(fp == NULL) 
     {
         std::cout << "fopen error" << std::endl;
@@ -298,19 +305,20 @@ void Image::writeJPG(unsigned int givenWidth, unsigned int givenHeight, Pixel **
     jpeg_finish_compress(&cinfo);
     jpeg_destroy_compress(&cinfo);
     fclose(fp);
+    free(imageBuffer);
 }
 
 
 /*
    Function that writes a PNG file with given properties.
 */
-void Image::writePNG(unsigned int givenWidth, unsigned int givenHeight, Pixel **givenMatrix)
+void Image::writePNG(unsigned int givenWidth, unsigned int givenHeight, Pixel **givenMatrix, std::string output)
 {
     FILE *file = NULL;
     FILE *fp = NULL;
     png_structp png_ptr = NULL;
     png_infop info_ptr = NULL;
-    fp = fopen("output.png", "wb");
+    fp = fopen(output.c_str(), "wb");
     if (fp == NULL) 
     {
         std::cout << "fopen error" << std::endl;
@@ -365,6 +373,10 @@ void Image::writePNG(unsigned int givenWidth, unsigned int givenHeight, Pixel **
     png_set_rows (png_ptr, info_ptr, rowPointers);
     png_write_png (png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
     png_write_end(png_ptr, NULL); 
+    png_destroy_write_struct(&png_ptr, &info_ptr);
+    fclose(fp);
+    for(unsigned int i = 0; i < givenHeight; i++)
+        free(rowPointers[i]);
     free(rowPointers);
 }   
 
@@ -375,5 +387,20 @@ Pixel** Image::getRGBMatrix()
 
 Image::~Image()
 {
-    free(matrix);
+    if(this->isNotACopy)
+    {
+        for(unsigned int i = 0; i < height; i++)
+            free(matrix[i]);
+        free(matrix);
+    }
+}
+
+int main(int argc, char** argv)
+{
+    std::string input = argv[1];
+    std::string output = argv[2];
+    Image img(input);
+    Image img2(0, img.getWidth(), img.getHeight(), img.getRGBMatrix(), output);
+    //std::cout << "Log->Image.cpp Input : " << input << "  Output : " << output << std::endl;
+    return 0;
 }
