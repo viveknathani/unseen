@@ -38,6 +38,7 @@ Image::Image(int givenFiletype, unsigned int givenWidth, unsigned int givenHeigh
 */
 Image::Image(std::string path)
 {
+    this->isNotACopy = true;
     filetype = findFileType(path);
     if(filetype == -1)
     {
@@ -393,14 +394,4 @@ Image::~Image()
             free(matrix[i]);
         free(matrix);
     }
-}
-
-int main(int argc, char** argv)
-{
-    std::string input = argv[1];
-    std::string output = argv[2];
-    Image img(input);
-    Image img2(0, img.getWidth(), img.getHeight(), img.getRGBMatrix(), output);
-    //std::cout << "Log->Image.cpp Input : " << input << "  Output : " << output << std::endl;
-    return 0;
 }
