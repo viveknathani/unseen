@@ -15,10 +15,10 @@ subprocess.run(delete_prev_outputs, shell=True)
 
 count_jpg = 0
 count_png = 0
-for f in os.listdir(path_to_data):
-    if(os.path.splitext(f)[1].lower() in ('.jpg')):
+for files in os.listdir(path_to_data):
+    if(os.path.splitext(files)[1].lower() in ('.jpg')):
         count_jpg += 1
-    if(os.path.splitext(f)[1].lower() in ('.png')):
+    if(os.path.splitext(files)[1].lower() in ('.png')):
         count_png += 1    
 
 combined_str = run_valgrind + path_to_bin + "./lib_test.o " + path_to_data
