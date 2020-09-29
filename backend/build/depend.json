@@ -1,0 +1,9 @@
+{
+    "python_packages" : [ 
+        {"imagehash" : "ImageHash"},
+        {"PIL": "Pillow"}
+    ],
+    "ubuntu_apt" : [
+        "valgrind"
+    ]
+}
