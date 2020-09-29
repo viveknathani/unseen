@@ -17,7 +17,7 @@ class Image
         unsigned int height;
         int filetype;
         Pixel **matrix;
-        bool isNotACopy = true;
+        bool isNotACopy;
 
     public :
         Image(int givenFiletype, unsigned int givenWidth, unsigned int givenHeight, Pixel **givenMatrix, std::string output);
