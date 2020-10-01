@@ -59,7 +59,7 @@ Image::Image(std::string path)
 
 /*
     Detect file type using the signature.
-    JPEG has the signature : FFD8FF (in hex)
+    JPEG has the generic signature : FFD8 (in hex)
     PNG has the signature  : 8950 4E47 0D0A 1A0A (in hex)
     For simplicity, we are using the decimal format while checking.
 
@@ -78,7 +78,7 @@ int Image::findFileType(std::string path)
     unsigned char buffer[8];    // the file will read the signature and store it in this buffer
     for(int i = 0; i < 8; i++)
         buffer[i] = 0;
-    int jpgSignature[] = {255, 216, 255}; 
+    int jpgSignature[] = {255, 216}; 
     int pngSignature[] = {137, 80, 78, 71, 13, 10, 26, 10};
     bool checkJPG = true, checkPNG = true;
 
@@ -90,7 +90,7 @@ int Image::findFileType(std::string path)
     size_t readBytes = fread(buffer, sizeof(buffer), 1, file);
     fclose(file);
 
-    for(int i = 0; i < 3; i++)
+    for(int i = 0; i < 2; i++)
         if(static_cast<int>(buffer[i]) != jpgSignature[i]) checkJPG = false;
 
     for(int i = 0; i < 8; i++)
