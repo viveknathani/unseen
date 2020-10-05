@@ -41,6 +41,6 @@ const unsigned char LOOKUP_INV_SBOX[256]={
 23, 43, 4, 126, 186, 119, 214, 38, 225, 105, 20, 99, 85, 33, 12, 125 
 };
 
-const string LOOKUP_RCON[10];
+const std::string LOOKUP_RCON[10];
 
 #endif
