@@ -1,12 +1,51 @@
 #include "AES256.hpp"
+#include "AESLookups.hpp"
 #include <iostream>
 
-void mixColumns(unsigned char state[], bool inverse)
+void AES256::mixColumns(unsigned char state[], bool inverse)
 {
+    unsigned char temp[4];
+    if(inverse)                 //for decryption
+    {
+        for(int i=0;i<4;i++)
+        {
+            temp[0] = (LOOKUP_MUL_14[state[(4*i)+0]]) ^ (LOOKUP_MUL_11[state[(4*i)+1]]) 
+                ^ (LOOKUP_MUL_13[state[(4*i)+2]]) ^ (LOOKUP_MUL_9[state[(4*i)+3]]);
 
+            temp[1] = (LOOKUP_MUL_9[state[(4*i)+0]]) ^ (LOOKUP_MUL_14[state[(4*i)+1]])
+                ^ (LOOKUP_MUL_11[state[(4*i)+2]]) ^ (LOOKUP_MUL_13[state[(4*i)+3]]);
+
+            temp[2] = (LOOKUP_MUL_13[state[(4*i)+0]]) ^ (LOOKUP_MUL_9[state[(4*i)+1]]) 
+                ^ (LOOKUP_MUL_14[state[(4*i)+2]]) ^ (LOOKUP_MUL_11[state[(4*i)+3]]);
+            temp[3] = (LOOKUP_MUL_11[state[(4*i)+0]]) ^ (LOOKUP_MUL_13[state[(4*i)+1]]) 
+                ^ (LOOKUP_MUL_9[state[(4*i)+2]]) ^ (LOOKUP_MUL_14[state[(4*i)+3]]);
+            state[(4*i)+0] = temp[0];
+            state[(4*i)+1] = temp[1];
+            state[(4*i)+2] = temp[2];
+            state[(4*i)+3] = temp[3];
+        }
+    }
+    else                        //for encryption
+    {
+        for(int i=0;i<4;i++)
+        {
+            temp[0] = (LOOKUP_MUL_2[state[(4*i)+0]]) ^ (LOOKUP_MUL_3[state[(4*i)+1]]) 
+                ^ (state[(4*i)+2]) ^ (state[(4*i)+3]);
+            temp[1] = (state[(4*i)+0]) ^ (LOOKUP_MUL_2[state[(4*i)+1]])
+                ^ (LOOKUP_MUL_3[state[(4*i)+2]]) ^ (state[(4*i)+3]);
+            temp[2] = (state[(4*i)+0]) ^ (state[(4*i)+1]) 
+                ^ (LOOKUP_MUL_2[state[(4*i)+2]]) ^ (LOOKUP_MUL_3[state[(4*i)+3]]);
+            temp[3] = (LOOKUP_MUL_3[state[(4*i)+0]]) ^ (state[(4*i)+1]) 
+                ^ (state[(4*i)+2]) ^ (LOOKUP_MUL_2[state[(4*i)+3]]);
+            state[(4*i)+0] = temp[0];
+            state[(4*i)+1] = temp[1];
+            state[(4*i)+2] = temp[2];
+            state[(4*i)+3] = temp[3];
+        }
+    }
 }
 
-void shiftRows(unsigned char state[], bool inverse)
+void AES256::shiftRows(unsigned char state[], bool inverse)
 {
     unsigned char x;
     if(inverse)                 //for decryption
@@ -49,4 +88,3 @@ void shiftRows(unsigned char state[], bool inverse)
         state[14] = x;
     }
 }
-
