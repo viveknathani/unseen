@@ -5,22 +5,142 @@
 #include <vector>
 #include <iostream>
 using namespace std;
-#define show(x) cout << #x << " = " << x << endl
-AES256::AES256(std::string hexText, std::string hexKey)
+
+AES256::AES256(std::string hexInput, std::string hexKey, std::string hexIV, int task)
 {
-    this->hexText = hexText;
-    std::string iv = getIV();
+    this->originalLength = hexInput.size();
+    this->hexInput = hexInput;
+
+    for(int i = 0; i < KEY_SIZE_IN_BYTES; i++)
+        byteKey.push_back(0);
+
+    for(int i = 0; i < IV_SIZE_IN_BYTES; i++)
+        byteIV.push_back(0);
+
+    for(int i = 0; i < NUMBER_OF_ROUNDS; i++)
+    {
+        std::vector<unsigned char> temp(ROUND_KEY_SIZE_IN_BYTES);
+        roundKeys.push_back(temp);
+    }
+
+    for(int i = 0; i < NUMBER_OF_WORDS; i++)
+    {
+        std::vector<unsigned char> temp(WORD_SIZE_IN_BYTES);
+        words.push_back(temp);
+    }
+
     convertHexToBytes(hexKey, byteKey);
-    //convertHexToBytes(iv, byteIV);
     keyExpansion(byteKey);
+
+    switch(task)
+    {
+        case ENCRYPT : {
+            hexIV = getIV();
+            convertHexToBytes(hexIV, byteIV);
+            encrypt();
+            break;
+        }
+
+        case DECRYPT: {
+            convertHexToBytes(hexIV, byteIV);
+            break;
+        }
+
+        default : cout << "Invalid task number." << endl;
+    }
 }
 
-AES256::AES256(std::string hexText, std::string hexKey, std::string hexIV)
+void AES256::encrypt()
 {
 
 }
 
-void AES256::mixColumns(unsigned char state[], bool inverse)
+void AES256::decrypt()
+{
+
+}
+
+void AES256::keyExpansion(std::vector<unsigned char> key)
+{
+    std::vector<std::vector<unsigned char>> wordsInKey(NUMBER_OF_WORDS_IN_KEY);
+    for(int i = 0; i < NUMBER_OF_WORDS_IN_KEY; i++)
+    {
+        std::vector<unsigned char> temp(WORD_SIZE_IN_BYTES);
+        for(int j = 0; j < WORD_SIZE_IN_BYTES; j++)
+            temp[j] = key[(4*i) + j];
+        words[i] = temp;    
+    }
+
+    for(int i = 0; i < NUMBER_OF_WORDS; i++)
+    {
+        if(i < NUMBER_OF_WORDS_IN_KEY)
+        {
+            words[i] = wordsInKey[i];   
+        }
+        else if(i >= NUMBER_OF_WORDS_IN_KEY && (i % NUMBER_OF_WORDS_IN_KEY == 0))
+        {
+            std::vector<unsigned char> rconWord(WORD_SIZE_IN_BYTES);
+
+            int index = (i / NUMBER_OF_WORDS_IN_KEY);
+            for(int j = 0; j < WORD_SIZE_IN_BYTES; j++)
+                rconWord[j] = LOOKUP_RCON[index-1][j];
+
+            words[i] = xorWords( 
+                            xorWords(
+                                words[i - NUMBER_OF_WORDS_IN_KEY], 
+                                subWord(rotWord(words[i-1]))
+                                    ), 
+                            rconWord
+                        );
+        }
+
+        else if(i >= NUMBER_OF_WORDS_IN_KEY && (i % NUMBER_OF_WORDS_IN_KEY == 4))
+        {
+            words[i] = xorWords(
+                            words[i - NUMBER_OF_WORDS_IN_KEY], 
+                            subWord(words[i-1])
+                       );
+        }
+        else 
+        {
+            words[i] = xorWords(
+                            words[i - NUMBER_OF_WORDS_IN_KEY], 
+                            subWord(words[i-1])
+                       );
+        }
+    }
+
+    int rKeyPtr = 0;
+    for(int i = 0; i < NUMBER_OF_WORDS; i += 4)
+    {
+        int keyPtr = 0;
+        for(int j = i; j < i+4; j++)
+        {
+            for(int k = 0; k < WORD_SIZE_IN_BYTES; k++)
+            {
+                roundKeys[rKeyPtr][keyPtr] = words[j][k];
+                keyPtr++;
+            }
+        }
+        rKeyPtr++;
+    }
+}
+
+void AES256::subBytes(std::vector<unsigned char> state, bool inverse)
+{
+    if(inverse)
+    {
+        for(int i = 0; i < BLOCK_SIZE_IN_BYTES; i++)
+            state[i] = LOOKUP_INV_SBOX[state[i]];
+    }
+    else 
+    {
+        for(int i = 0; i < BLOCK_SIZE_IN_BYTES; i++)
+            state[i] = LOOKUP_SBOX[state[i]];
+    }
+}
+
+void AES256::mixColumns(std::vector<unsigned char> state, bool inverse)
 {
     unsigned char temp[4];
     if(inverse)                 //for decryption
@@ -63,7 +183,7 @@ void AES256::mixColumns(unsigned char state[], bool inverse)
     }
 }
 
-void AES256::shiftRows(unsigned char state[], bool inverse)
+void AES256::shiftRows(std::vector<unsigned char> state, bool inverse)
 {
     unsigned char x;
     if(inverse)                 //for decryption
@@ -107,138 +227,41 @@ void AES256::shiftRows(unsigned char state[], bool inverse)
     }
 }
 
-void AES256::subBytes(unsigned char state[], bool inverse)
+void AES256::addRoundKey(std::vector<unsigned char> state, int index)
 {
-    if(inverse)
-    {
-        for(int i = 0; i < BLOCK_SIZE_IN_BYTES; i++)
-            state[i] = LOOKUP_INV_SBOX[state[i]];
-    }
-    else 
-    {
-        for(int i = 0; i < BLOCK_SIZE_IN_BYTES; i++)
-            state[i] = LOOKUP_SBOX[state[i]];
-    }
+    for(int i = 0; i < BLOCK_SIZE_IN_BYTES; i++)
+        state[i] = state[i] ^ roundKeys[index][i];
 }
 
-void AES256::subWord(unsigned char word[], unsigned char result[])
+std::vector<unsigned char> subWord(std::vector<unsigned char> word)
 {
+    std::vector<unsigned char> result(WORD_SIZE_IN_BYTES);
     for(int i = 0; i < WORD_SIZE_IN_BYTES; i++)   
             result[i] = LOOKUP_SBOX[word[i]];    
+    return result;        
 }
 
-void AES256::rotWord(unsigned char word[], unsigned char result[])
+std::vector<unsigned char> AES256::rotWord(std::vector<unsigned char> word)
 {
-    unsigned char temp[WORD_SIZE_IN_BYTES];    
-    temp[0] = word[1]; 
-    temp[1] = word[2];
-    temp[2] = word[3];
-    temp[3] = word[0];
+    std::vector<unsigned char> result(WORD_SIZE_IN_BYTES);
 
-    for(int i = 0; i < WORD_SIZE_IN_BYTES; i++)
-        result[i] = temp[i];
+    result[0] = word[1]; 
+    result[1] = word[2];
+    result[2] = word[3];
+    result[3] = word[0];
+
+    return result;
 }
 
-void AES256::addRoundKey(unsigned char state[], int index)
+std::vector<unsigned char> xorWords(std::vector<unsigned char> one, std::vector<unsigned char> two)
 {
-    unsigned char currentRoundKey[ROUND_KEY_SIZE_IN_BYTES];
-    for(int i = 0; i < ROUND_KEY_SIZE_IN_BYTES; i++)
-        currentRoundKey[i] = static_cast<unsigned char>(roundKeys[index][i]);
-
-    for(int i = 0; i < BLOCK_SIZE_IN_BYTES; i++)
-        state[i] = state[i] ^ currentRoundKey[i];
-}
-
-void AES256::xorWords(unsigned char one[], unsigned char two[], unsigned char result[])
-{
+    std::vector<unsigned char> result(WORD_SIZE_IN_BYTES);   
     for(int i = 0; i < WORD_SIZE_IN_BYTES; i++)
         result[i] = one[i] ^ two[i];
+    return result;    
 }
 
-void AES256::keyExpansion(unsigned char key[])
-{
-    unsigned char wordsInKey[NUMBER_OF_WORDS_IN_KEY][WORD_SIZE_IN_BYTES + 1];
-
-    for(int i = 0; i < NUMBER_OF_WORDS_IN_KEY; i++)
-    {
-        wordsInKey[i][0] = key[4*i];
-        wordsInKey[i][1] = key[4*i+1];
-        wordsInKey[i][2] = key[4*i+2];
-        wordsInKey[i][3] = key[4*i+3];
-        wordsInKey[i][4] = '\0';
-    }
-
-    for(int i = 0; i < NUMBER_OF_WORDS; i++)
-    {
-        if(i < NUMBER_OF_WORDS_IN_KEY)
-        {
-            for(int j = 0; j < WORD_SIZE_IN_BYTES; j++)
-                words[i][j] = wordsInKey[i][j];
-            words[i][WORD_SIZE_IN_BYTES] = '\0';    
-        }
-        else if(i >= NUMBER_OF_WORDS_IN_KEY && (i % NUMBER_OF_WORDS_IN_KEY == 0))
-        {
-            unsigned char one[WORD_SIZE_IN_BYTES];
-            unsigned char two[WORD_SIZE_IN_BYTES];
-            unsigned char rconword[WORD_SIZE_IN_BYTES];
-            unsigned char result[WORD_SIZE_IN_BYTES];
-            for(int j = 0; j < WORD_SIZE_IN_BYTES; j++)
-                one[j] = words[i - NUMBER_OF_WORDS_IN_KEY][j];
-            for(int j = 0; j < WORD_SIZE_IN_BYTES; j++)
-                two[j] = words[i - 1][j];   
-
-            rotWord(two, two);    
-            subWord(two, two);
-
-            int index = (i / NUMBER_OF_WORDS_IN_KEY);
-            for(int j = 0; j < WORD_SIZE_IN_BYTES; j++)
-                rconword[j] = LOOKUP_RCON[index-1][j];
-
-            xorWords(one, two, result);
-            xorWords(result, rconword, result);
-
-            for(int j = 0; j < WORD_SIZE_IN_BYTES; j++)
-                words[i][j] = result[j];
-            words[i][WORD_SIZE_IN_BYTES] = '\0'; 
-        }
-
-        else if(i >= NUMBER_OF_WORDS_IN_KEY && (i % NUMBER_OF_WORDS_IN_KEY == 4))
-        {
-            unsigned char one[WORD_SIZE_IN_BYTES];
-            unsigned char two[WORD_SIZE_IN_BYTES];
-            unsigned char result[WORD_SIZE_IN_BYTES];   
-            for(int j = 0; j < WORD_SIZE_IN_BYTES; j++)
-                one[j] = words[i - NUMBER_OF_WORDS_IN_KEY][j];
-            for(int j = 0; j < WORD_SIZE_IN_BYTES; j++)
-                two[j] = words[i - 1][j];    
-
-            subWord(two, two);       
-
-            xorWords(one, two, result);
-            for(int j = 0; j < WORD_SIZE_IN_BYTES; j++)
-                words[i][j] = result[j];
-            words[i][WORD_SIZE_IN_BYTES] = '\0'; 
-        }
-        else 
-        {
-            unsigned char one[WORD_SIZE_IN_BYTES];
-            unsigned char two[WORD_SIZE_IN_BYTES];
-            unsigned char result[WORD_SIZE_IN_BYTES];   
-            for(int j = 0; j < WORD_SIZE_IN_BYTES; j++)
-                one[j] = static_cast<unsigned char>(words[i - NUMBER_OF_WORDS_IN_KEY][j]);
-            for(int j = 0; j < WORD_SIZE_IN_BYTES; j++)
-                two[j] = static_cast<unsigned char>(words[i - 1][j]);  
-
-            xorWords(one, two, result);         
-
-           for(int j = 0; j < WORD_SIZE_IN_BYTES; j++)
-                words[i][j] = result[j];
-            words[i][WORD_SIZE_IN_BYTES] = '\0'; 
-        }
-    }
-}
-
-void AES256::convertHexToBytes(std::string str, unsigned char byteArray[])
+void AES256::convertHexToBytes(std::string str, std::vector<unsigned char> byteVec)
 {
     int bytePointer = 0;
     for(int i = 0; i < str.size(); i += 2)
@@ -246,38 +269,28 @@ void AES256::convertHexToBytes(std::string str, unsigned char byteArray[])
         std::string input;
         input += str[i];
         input += str[i+1];
-        byteArray[bytePointer] = LOOKUP_TO_BYTE.at(input);
+        byteVec[bytePointer] = LOOKUP_TO_BYTE.at(input);
         bytePointer++;
     }
 }
 
 std::vector<std::vector<unsigned char>> AES256::getAllWords()
 {
-    std::vector<std::vector<unsigned char>> keysToSend(NUMBER_OF_WORDS);
-    for(int i = 0; i < NUMBER_OF_WORDS; i++)
-    {
-        std::vector<unsigned char> temp(4);
-        for(int j = 0; j < 4; j++)
-        {
-            temp[j] = words[i][j];
-        }
-        keysToSend[i] = temp;
-    }
-    return keysToSend;    
+    return words;
+}
+
+std::vector<std::vector<unsigned char>> AES256::getAllRoundKeys()
+{
+    return roundKeys;
+}
+
+std::string AES256::getHexOutput()
+{
+    return hexOutput;
 }
 
 int main()
 {
-    AES256 obj("11", "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4");
-    std::vector<std::vector<unsigned char>> allWords = obj.getAllWords();
-    cout << "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4" << endl;
-    for(int i = 0; i < (int)allWords.size(); i++)
-    {
-        for(int j = 0; j < (int)allWords[i].size(); j++)
-        {
-            std::cout << LOOKUP_TO_HEX[allWords[i][j]];
-        }
-        std::cout << std::endl;
-    }
+    
     return 0;
 }
