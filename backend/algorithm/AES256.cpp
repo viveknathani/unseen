@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include <iostream>
-using namespace std;
 
 AES256::AES256(std::string hexInput, std::string hexKey, std::string hexIV, int task)
 {
@@ -46,7 +45,7 @@ AES256::AES256(std::string hexInput, std::string hexKey, std::string hexIV, int 
             break;
         }
 
-        default : cout << "Invalid task number." << endl;
+        default : std::cout << "Invalid task number." << std::endl;
     }
 }
 
@@ -287,29 +286,4 @@ std::vector<std::vector<unsigned char>> AES256::getAllRoundKeys()
 std::string AES256::getHexOutput()
 {
     return hexOutput;
-}
-
-int main()
-{
-    std::string key = "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4";
-    AES256 obj("00", key, "00", ENCRYPT);
-    std::vector<vector<unsigned char>> allw = obj.getAllWords(), allk = obj.getAllRoundKeys();
-    cout << key << endl;
-    for(int i = 0; i < (int)allw.size(); i++)
-    {
-        for(int j = 0; j < (int)allw[i].size(); j++)
-        {
-            cout << LOOKUP_TO_HEX[allw[i][j]];
-        }
-        cout << endl;
-    }
-    for(int i = 0; i < (int)allk.size(); i++)
-    {
-        for(int j = 0; j < (int)allk[i].size(); j++)
-        {
-            cout << LOOKUP_TO_HEX[allk[i][j]];
-        }
-        cout << endl;
-    }
-    return 0;
 }
