@@ -33,17 +33,17 @@ class AES256
         void decrypt();
 
         // key functions    
-        void keyExpansion(std::vector<unsigned char> key);
-        void subBytes(std::vector<unsigned char> state, bool inverse);
-        void mixColumns(std::vector<unsigned char> state, bool inverse);
-        void shiftRows(std::vector<unsigned char> state, bool inverse);
-        void addRoundKey(std::vector<unsigned char> state, int index);
+        void keyExpansion(std::vector<unsigned char> &key);
+        void subBytes(std::vector<unsigned char> &state, bool inverse);
+        void mixColumns(std::vector<unsigned char> &state, bool inverse);
+        void shiftRows(std::vector<unsigned char> &state, bool inverse);
+        void addRoundKey(std::vector<unsigned char> &state, int index);
 
         // utility functions
         std::vector<unsigned char> subWord(std::vector<unsigned char> word);
         std::vector<unsigned char> rotWord(std::vector<unsigned char> word);
         std::vector<unsigned char> xorWords(std::vector<unsigned char> one, std::vector<unsigned char> two);
-        void convertHexToBytes(std::string str, std::vector<unsigned char> byteVec);
+        void convertHexToBytes(std::string str, std::vector<unsigned char> &byteVec);
 
         // getter functions
         std::vector<std::vector<unsigned char>> getAllWords();
