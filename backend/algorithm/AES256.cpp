@@ -42,6 +42,7 @@ AES256::AES256(std::string hexInput, std::string hexKey, std::string hexIV, int 
 
         case DECRYPT: {
             convertHexToBytes(hexIV, byteIV);
+            decrypt();
             break;
         }
 
