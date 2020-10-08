@@ -60,7 +60,7 @@ void AES256::decrypt()
 
 }
 
-void AES256::keyExpansion(std::vector<unsigned char> key)
+void AES256::keyExpansion(std::vector<unsigned char> &key)
 {
     std::vector<std::vector<unsigned char>> wordsInKey(NUMBER_OF_WORDS_IN_KEY);
     for(int i = 0; i < NUMBER_OF_WORDS_IN_KEY; i++)
@@ -68,7 +68,7 @@ void AES256::keyExpansion(std::vector<unsigned char> key)
         std::vector<unsigned char> temp(WORD_SIZE_IN_BYTES);
         for(int j = 0; j < WORD_SIZE_IN_BYTES; j++)
             temp[j] = key[(4*i) + j];
-        words[i] = temp;    
+        wordsInKey[i] = temp;    
     }
 
     for(int i = 0; i < NUMBER_OF_WORDS; i++)
@@ -105,7 +105,7 @@ void AES256::keyExpansion(std::vector<unsigned char> key)
         {
             words[i] = xorWords(
                             words[i - NUMBER_OF_WORDS_IN_KEY], 
-                            subWord(words[i-1])
+                            words[i-1]
                        );
         }
     }
@@ -126,7 +126,7 @@ void AES256::keyExpansion(std::vector<unsigned char> key)
     }
 }
 
-void AES256::subBytes(std::vector<unsigned char> state, bool inverse)
+void AES256::subBytes(std::vector<unsigned char> &state, bool inverse)
 {
     if(inverse)
     {
@@ -140,7 +140,7 @@ void AES256::subBytes(std::vector<unsigned char> state, bool inverse)
     }
 }
 
-void AES256::mixColumns(std::vector<unsigned char> state, bool inverse)
+void AES256::mixColumns(std::vector<unsigned char> &state, bool inverse)
 {
     unsigned char temp[4];
     if(inverse)                 //for decryption
@@ -183,7 +183,7 @@ void AES256::mixColumns(std::vector<unsigned char> state, bool inverse)
     }
 }
 
-void AES256::shiftRows(std::vector<unsigned char> state, bool inverse)
+void AES256::shiftRows(std::vector<unsigned char> &state, bool inverse)
 {
     unsigned char x;
     if(inverse)                 //for decryption
@@ -227,13 +227,13 @@ void AES256::shiftRows(std::vector<unsigned char> state, bool inverse)
     }
 }
 
-void AES256::addRoundKey(std::vector<unsigned char> state, int index)
+void AES256::addRoundKey(std::vector<unsigned char> &state, int index)
 {
     for(int i = 0; i < BLOCK_SIZE_IN_BYTES; i++)
         state[i] = state[i] ^ roundKeys[index][i];
 }
 
-std::vector<unsigned char> subWord(std::vector<unsigned char> word)
+std::vector<unsigned char> AES256::subWord(std::vector<unsigned char> word)
 {
     std::vector<unsigned char> result(WORD_SIZE_IN_BYTES);
     for(int i = 0; i < WORD_SIZE_IN_BYTES; i++)   
@@ -253,7 +253,7 @@ std::vector<unsigned char> AES256::rotWord(std::vector<unsigned char> word)
     return result;
 }
 
-std::vector<unsigned char> xorWords(std::vector<unsigned char> one, std::vector<unsigned char> two)
+std::vector<unsigned char> AES256::xorWords(std::vector<unsigned char> one, std::vector<unsigned char> two)
 {
     std::vector<unsigned char> result(WORD_SIZE_IN_BYTES);   
     for(int i = 0; i < WORD_SIZE_IN_BYTES; i++)
@@ -261,7 +261,7 @@ std::vector<unsigned char> xorWords(std::vector<unsigned char> one, std::vector<
     return result;    
 }
 
-void AES256::convertHexToBytes(std::string str, std::vector<unsigned char> byteVec)
+void AES256::convertHexToBytes(std::string str, std::vector<unsigned char> &byteVec)
 {
     int bytePointer = 0;
     for(int i = 0; i < str.size(); i += 2)
@@ -291,6 +291,25 @@ std::string AES256::getHexOutput()
 
 int main()
 {
-    
+    std::string key = "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4";
+    AES256 obj("00", key, "00", ENCRYPT);
+    std::vector<vector<unsigned char>> allw = obj.getAllWords(), allk = obj.getAllRoundKeys();
+    cout << key << endl;
+    for(int i = 0; i < (int)allw.size(); i++)
+    {
+        for(int j = 0; j < (int)allw[i].size(); j++)
+        {
+            cout << LOOKUP_TO_HEX[allw[i][j]];
+        }
+        cout << endl;
+    }
+    for(int i = 0; i < (int)allk.size(); i++)
+    {
+        for(int j = 0; j < (int)allk[i].size(); j++)
+        {
+            cout << LOOKUP_TO_HEX[allk[i][j]];
+        }
+        cout << endl;
+    }
     return 0;
 }
