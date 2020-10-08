@@ -18,33 +18,37 @@
 class AES256
 {
     private :
-        int task;
-        std::string hexText;
-        unsigned char byteKey[KEY_SIZE_IN_BYTES];
-        unsigned char byteIV[IV_SIZE_IN_BYTES];
-        unsigned char roundKeys[NUMBER_OF_ROUNDS][ROUND_KEY_SIZE_IN_BYTES + 1];
-        unsigned char words[NUMBER_OF_WORDS][WORD_SIZE_IN_BYTES + 1];
-        unsigned char state[BLOCK_SIZE_IN_BYTES];
+        unsigned int originalLength;
+        std::string hexInput;
+        std::string hexOutput;
+        std::vector<unsigned char> byteKey;
+        std::vector<unsigned char> byteIV;
+        std::vector<std::vector<unsigned char>> roundKeys;
+        std::vector<std::vector<unsigned char>> words;
+        std::vector<std::vector<unsigned char>> blocks;
 
     public :
-        AES256(std::string hexText, std::string hexKey);
-        AES256(std::string hexText, std::string hexKey, std::string hexIV);
+        AES256(std::string hexInput, std::string hexKey, std::string hexIV, int task);
+        void encrypt();
+        void decrypt();
 
         // key functions    
-        void keyExpansion(unsigned char key[]);
-        void subBytes(unsigned char state[], bool inverse);
-        void mixColumns(unsigned char state[], bool inverse);
-        void shiftRows(unsigned char state[], bool inverse);
-        void addRoundKey(unsigned char state[], int index);
+        void keyExpansion(std::vector<unsigned char> key);
+        void subBytes(std::vector<unsigned char> state, bool inverse);
+        void mixColumns(std::vector<unsigned char> state, bool inverse);
+        void shiftRows(std::vector<unsigned char> state, bool inverse);
+        void addRoundKey(std::vector<unsigned char> state, int index);
 
         // utility functions
-        void subWord(unsigned char word[], unsigned char result[]);
-        void rotWord(unsigned char word[], unsigned char result[]);
-        void xorWords(unsigned char one[], unsigned char two[], unsigned char result[]);
-        void convertHexToBytes(std::string str, unsigned char byteArray[]);
+        std::vector<unsigned char> subWord(std::vector<unsigned char> word);
+        std::vector<unsigned char> rotWord(std::vector<unsigned char> word);
+        std::vector<unsigned char> xorWords(std::vector<unsigned char> one, std::vector<unsigned char> two);
+        void convertHexToBytes(std::string str, std::vector<unsigned char> byteVec);
 
-        // getter
+        // getter functions
         std::vector<std::vector<unsigned char>> getAllWords();
+        std::vector<std::vector<unsigned char>> getAllRoundKeys();
+        std::string getHexOutput();
 };
 
 #endif
