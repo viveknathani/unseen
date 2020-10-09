@@ -44,6 +44,8 @@ class AES256
         std::vector<unsigned char> rotWord(std::vector<unsigned char> word);
         std::vector<unsigned char> xorWords(std::vector<unsigned char> one, std::vector<unsigned char> two);
         void convertHexToBytes(std::string str, std::vector<unsigned char> &byteVec);
+        void applyPadding();
+        void initBlocks();
 
         // getter functions
         std::vector<std::vector<unsigned char>> getAllWords();

@@ -10,6 +10,9 @@ AES256::AES256(std::string hexInput, std::string hexKey, std::string hexIV, int 
     this->originalLength = hexInput.size();
     this->hexInput = hexInput;
 
+    applyPadding();
+    initBlocks();
+
     for(int i = 0; i < KEY_SIZE_IN_BYTES; i++)
         byteKey.push_back(0);
 
@@ -272,6 +275,16 @@ void AES256::convertHexToBytes(std::string str, std::vector<unsigned char> &byte
         byteVec[bytePointer] = LOOKUP_TO_BYTE.at(input);
         bytePointer++;
     }
+}
+
+void AES256::applyPadding()
+{
+
+}
+
+void AES256::initBlocks()
+{
+
 }
 
 std::vector<std::vector<unsigned char>> AES256::getAllWords()
