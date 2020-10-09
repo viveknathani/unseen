@@ -5,7 +5,7 @@
 #include <vector>
 #include <iostream>
 
-AES256::AES256(std::string hexInput, std::string hexKey, std::string hexIV, int task)
+AES256::AES256(std::string hexInput, std::string hexKey, std::string hexIV, int task, bool lacksIV)
 {
     this->originalLength = hexInput.size();
     this->hexInput = hexInput;
@@ -36,7 +36,7 @@ AES256::AES256(std::string hexInput, std::string hexKey, std::string hexIV, int 
     switch(task)
     {
         case ENCRYPT : {
-            hexIV = getIV();
+            if(lacksIV) hexIV = getIV();
             convertHexToBytes(hexIV, byteIV);
             applyPadding();
             encrypt();
@@ -55,12 +55,61 @@ AES256::AES256(std::string hexInput, std::string hexKey, std::string hexIV, int 
 
 void AES256::encrypt()
 {
+    for(int i = 0; i < (int)blocks.size(); i++)
+    {
+        for(int j = 0; j < BLOCK_SIZE_IN_BYTES; j++)
+        {
+            if(i == 0) blocks[i][j] = blocks[i][j] ^ byteIV[j];
+            else blocks[i][j] = blocks[i][j] ^ blocks[i-1][j];
+        }
 
+        addRoundKey(blocks[i], 0);
+
+        for(int j = 1; j <= 13; j++)
+        {
+            subBytes(blocks[i], false);
+            shiftRows(blocks[i], false);
+            mixColumns(blocks[i], false);
+            addRoundKey(blocks[i], j);
+        }
+
+        subBytes(blocks[i], false);
+        shiftRows(blocks[i], false);
+        addRoundKey(blocks[i], 14);
+        convertBytesToHex(hexOutput, blocks[i]);
+    }
 }
 
 void AES256::decrypt()
 {
+    std::vector<unsigned char> prevBlock, currentBlock;
+    for(int i = 0; i < (int)blocks.size(); i++)
+    {
+        currentBlock = blocks[i];
+        addRoundKey(blocks[i], 14);
 
+        for(int j = 13; j >= 1; j--)
+        {
+            shiftRows(blocks[i], true);
+            subBytes(blocks[i], true);
+            addRoundKey(blocks[i], j);
+            mixColumns(blocks[i], true);
+        }
+
+        shiftRows(blocks[i], true);
+        subBytes(blocks[i], true);
+        addRoundKey(blocks[i], 0);
+
+        for(int j = 0; j < BLOCK_SIZE_IN_BYTES; j++)
+        {
+            if(i == 0) blocks[i][j] = blocks[i][j] ^ byteIV[j];
+            else blocks[i][j] = blocks[i][j] ^ prevBlock[j];
+        }
+
+        convertBytesToHex(hexOutput, blocks[i]);
+
+        prevBlock = currentBlock;
+    }
 }
 
 void AES256::keyExpansion(std::vector<unsigned char> &key)
@@ -267,7 +316,7 @@ std::vector<unsigned char> AES256::xorWords(std::vector<unsigned char> one, std:
 void AES256::convertHexToBytes(std::string str, std::vector<unsigned char> &byteVec)
 {
     int bytePointer = 0;
-    for(int i = 0; i < str.size(); i += 2)
+    for(int i = 0; i < (int)str.size(); i += 2)
     {
         std::string input;
         input += str[i];
@@ -275,6 +324,12 @@ void AES256::convertHexToBytes(std::string str, std::vector<unsigned char> &byte
         byteVec[bytePointer] = LOOKUP_TO_BYTE.at(input);
         bytePointer++;
     }
+}
+
+void AES256::convertBytesToHex(std::string &str, std::vector<unsigned char> byteVec)
+{
+    for(int i = 0; i < (int)byteVec.size(); i++)
+        str += LOOKUP_TO_HEX[byteVec[i]]; 
 }
 
 void AES256::applyPadding()
@@ -289,7 +344,7 @@ void AES256::initBlocks()
 {
     int length = hexInput.length();
     int numberOfBlocks = length / 32;
-    for(int i=0;i<numberOfBlocks;i++)
+    for(int i = 0; i < numberOfBlocks; i++)
     {
         std::string temp = hexInput.substr(i*32,32);
         std::vector<unsigned char> tempBytes(BLOCK_SIZE_IN_BYTES);

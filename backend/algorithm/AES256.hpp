@@ -28,7 +28,7 @@ class AES256
         std::vector<std::vector<unsigned char>> blocks;
 
     public :
-        AES256(std::string hexInput, std::string hexKey, std::string hexIV, int task);
+        AES256(std::string hexInput, std::string hexKey, std::string hexIV, int task, bool lacksIV);
         void encrypt();
         void decrypt();
 
@@ -44,6 +44,7 @@ class AES256
         std::vector<unsigned char> rotWord(std::vector<unsigned char> word);
         std::vector<unsigned char> xorWords(std::vector<unsigned char> one, std::vector<unsigned char> two);
         void convertHexToBytes(std::string str, std::vector<unsigned char> &byteVec);
+        void convertBytesToHex(std::string &str, std::vector<unsigned char> byteVec);
         void applyPadding();
         void initBlocks();
 
