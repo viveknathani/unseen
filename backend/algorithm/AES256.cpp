@@ -10,7 +10,6 @@ AES256::AES256(std::string hexInput, std::string hexKey, std::string hexIV, int 
     this->originalLength = hexInput.size();
     this->hexInput = hexInput;
 
-    applyPadding();
     initBlocks();
 
     for(int i = 0; i < KEY_SIZE_IN_BYTES; i++)
@@ -39,6 +38,7 @@ AES256::AES256(std::string hexInput, std::string hexKey, std::string hexIV, int 
         case ENCRYPT : {
             hexIV = getIV();
             convertHexToBytes(hexIV, byteIV);
+            applyPadding();
             encrypt();
             break;
         }
@@ -279,12 +279,23 @@ void AES256::convertHexToBytes(std::string str, std::vector<unsigned char> &byte
 
 void AES256::applyPadding()
 {
-
+    int length = hexInput.length();
+    int remainder = length % 32;
+    int bytesNeeded = (32 - remainder) / 2;
+    hexInput += LOOKUP_PAD[bytesNeeded - 1];
 }
 
 void AES256::initBlocks()
 {
-
+    int length = hexInput.length();
+    int numberOfBlocks = length / 32;
+    for(int i=0;i<numberOfBlocks;i++)
+    {
+        std::string temp = hexInput.substr(i*32,32);
+        std::vector<unsigned char> tempBytes(BLOCK_SIZE_IN_BYTES);
+        convertHexToBytes(temp,tempBytes);
+        blocks.push_back(tempBytes);
+    }
 }
 
 std::vector<std::vector<unsigned char>> AES256::getAllWords()
