@@ -36,7 +36,12 @@ for py_pack in data["python_packages"]:
 if(os.path.isdir("../bin") is False):
     subprocess.run("mkdir ../bin", shell=True)
 lib_compile = "g++ run.cpp ../lib/Image.cpp -ljpeg -lpng -o ../bin/lib_test.o"
-print("Compiling...")
+print("Compiling for lib_test.o...")
 subprocess.run(lib_compile, shell=True)
+
+# prepare algo_test.o
+algo_compile = "g++ algo.cpp ../algorithm/AES256.cpp -o ../bin/algo_test.o"
+print("Compiling for algo_test.o...")
+subprocess.run(algo_compile, shell=True)
 
 print("Build Successful!")
