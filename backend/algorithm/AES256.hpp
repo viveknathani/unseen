@@ -28,7 +28,7 @@ class AES256
         std::vector<std::vector<unsigned char>> blocks;
 
     public :
-        AES256(std::string hexInput, std::string hexKey, std::string hexIV, int task, bool lacksIV);
+        AES256(std::string hexInput, std::string hexKey, std::string &hexIV, int task, bool lacksIV);
         void encrypt();
         void decrypt();
 

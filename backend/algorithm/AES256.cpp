@@ -5,7 +5,7 @@
 #include <vector>
 #include <iostream>
 
-AES256::AES256(std::string hexInput, std::string hexKey, std::string hexIV, int task, bool lacksIV)
+AES256::AES256(std::string hexInput, std::string hexKey, std::string &hexIV, int task, bool lacksIV)
 {
     this->originalLength = hexInput.size();
     this->hexInput = hexInput;
