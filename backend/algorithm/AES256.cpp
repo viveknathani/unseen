@@ -10,6 +10,7 @@ AES256::AES256(std::string hexInput, std::string hexKey, std::string &hexIV, int
     this->originalLength = hexInput.size();
     this->hexInput = hexInput;
 
+    if(task == ENCRYPT) applyPadding();
     initBlocks();
 
     for(int i = 0; i < KEY_SIZE_IN_BYTES; i++)
@@ -38,7 +39,6 @@ AES256::AES256(std::string hexInput, std::string hexKey, std::string &hexIV, int
         case ENCRYPT : {
             if(lacksIV) hexIV = getIV();
             convertHexToBytes(hexIV, byteIV);
-            applyPadding();
             encrypt();
             break;
         }
