@@ -49,7 +49,7 @@ for i in range(0, 256, 1):
 
     runthis = '../bin/./algo_test.o ' +  str(inputs[i]) + ' ' + str(keys[i]) + ' ' + str(IVs[i]) + ' ' + task
     result = subprocess.run(runthis, stdout=subprocess.PIPE, shell=True)
-    if(result.stdout.decode('utf-8') == outputs[i] + '\n'):
+    if(result.stdout.decode('utf-8').startswith(outputs[i])):
         count += 1
 
 total = 256
