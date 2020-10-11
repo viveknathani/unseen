@@ -1,12 +1,178 @@
-#include <iostream>
-#include <fstream>
 #include "../lib/Image.hpp"
 #include "../algorithm/AES256.hpp"
 #include "../algorithm/AESLookups.hpp"
+#include <fstream>
+#include <iostream>
+#include <vector>
 
-unsigned int getNumberOfBytes(std::string filePath)
+int getNumberOfBytes(std::string filePath);
+
+/*
+    argv[] has to be an array of length 5 or 6
+
+    argv[0] = name of object file.
+    argv[1] = path to input image.
+    argv[2] = path to output image.
+    argv[3] = key in hex.
+    argv[4] = task (encrypt/decrypt) (0/1).
+    argv[5] = path to binary file for decryption (this is case specific)
+
+    arg[0]'s existence is irrelevant to our needs.
+    Hence it is not extracted.
+*/
+
+int main(int argc, char** argv)
 {
-    unsigned int start, end;
+    std::string inputPath = argv[1];
+    std::string outputPath = argv[2];
+    std::string hexKey = argv[3];
+    std::string task = argv[4];
+    int formatTask = std::stoi(task);
+
+    if(!(formatTask == 0 || formatTask == 1))
+    {
+        std::cout << "Invalid task format." << std::endl;
+        return 1;
+    }
+
+    if((int)hexKey.length() != 64)
+    {
+        std::cout << "Invalid key provided." << std::endl;
+        return 1;
+    }
+
+
+    std::string hexInput;
+    Image inputImage(inputPath);
+    Pixel** imageMatrix = inputImage.getRGBMatrix();
+    unsigned int width = inputImage.getWidth(), height = inputImage.getHeight();
+
+    for(unsigned int i = 0; i < height; i++)
+    {
+        for(unsigned int j = 0; j < width; j++)
+        {
+            hexInput += LOOKUP_TO_HEX[imageMatrix[i][j].r];
+            hexInput += LOOKUP_TO_HEX[imageMatrix[i][j].g];
+            hexInput += LOOKUP_TO_HEX[imageMatrix[i][j].b];
+        }
+    }
+
+    switch(formatTask)
+    {
+        case 0: {
+            std::string hexIV = "00";
+            AES256 object(hexInput, hexKey, hexIV, ENCRYPT, true);
+            std::string hexOutput = object.getHexOutput();
+
+            int hexPointer = 0;
+            for(unsigned int i = 0; i < height; i++)
+            {
+                for(unsigned int j = 0; j < width; j++)
+                {
+                    std::string tempR, tempG, tempB;
+                    tempR += hexOutput[hexPointer];
+                    hexPointer++;
+                    tempR += hexOutput[hexPointer];
+                    hexPointer++;
+                    tempG += hexOutput[hexPointer];
+                    hexPointer++;
+                    tempG += hexOutput[hexPointer];
+                    hexPointer++;
+                    tempB += hexOutput[hexPointer];
+                    hexPointer++;
+                    tempB += hexOutput[hexPointer];
+                    hexPointer++;
+
+                    imageMatrix[i][j].r = LOOKUP_TO_BYTE.at(tempR);
+                    imageMatrix[i][j].g = LOOKUP_TO_BYTE.at(tempG);
+                    imageMatrix[i][j].b = LOOKUP_TO_BYTE.at(tempB);
+                }
+            }
+
+            int extraBytes = ((int)hexOutput.length() - (height * width * 3 * 2))/2;
+            int bufferSize = IV_SIZE_IN_BYTES + extraBytes;
+            unsigned char buffer[bufferSize];
+            std::vector<unsigned char> byteIV = object.getByteIV();
+            for(int i = 0; i < IV_SIZE_IN_BYTES; i++)
+                buffer[i] = byteIV[i];
+            for(int i = 16; i < bufferSize; i++)
+            {
+                std::string tempBuffer;
+                tempBuffer += hexOutput[hexPointer];
+                hexPointer++;
+                tempBuffer += hexOutput[hexPointer];
+                hexPointer++;
+                buffer[i] = LOOKUP_TO_BYTE.at(tempBuffer);
+            }    
+
+            std::string binaryFilePath = "../bin/temp.dat";
+            std::ofstream fileWriter;
+            fileWriter.open(binaryFilePath, std::ios::binary | std::ios::out);
+            fileWriter.write((char *)buffer, bufferSize);
+            fileWriter.close();
+
+            Image encryptedImage(1, width, height, imageMatrix, outputPath);
+            break;
+        }
+        
+        case 1: {
+            std::string binaryFilePath = argv[5];
+            int bytesToRead = getNumberOfBytes(binaryFilePath);
+
+            unsigned char buffer[bytesToRead];
+            char tempBuffer[bytesToRead];
+            std::ifstream fileReader;
+            fileReader.open(binaryFilePath, std::ios::binary | std::ios::in);
+            fileReader.read(tempBuffer, bytesToRead);
+            fileReader.close();
+            for(int i = 0; i < bytesToRead; i++)
+                buffer[i] = (unsigned char)tempBuffer[i];
+
+            for(int i = IV_SIZE_IN_BYTES; i < bytesToRead; i++)
+                hexInput += LOOKUP_TO_HEX[buffer[i]];
+
+            std::string hexIV;
+            for(int i = 0; i < IV_SIZE_IN_BYTES; i++)
+                hexIV += LOOKUP_TO_HEX[buffer[i]];
+
+            AES256 object(hexInput, hexKey, hexIV, DECRYPT, false);    
+            std::string hexOutput = object.getHexOutput();
+
+            int hexPointer = 0;
+            for(unsigned int i = 0; i < height; i++)
+            {
+                for(unsigned int j = 0; j < width; j++)
+                {
+                    std::string tempR, tempG, tempB;
+                    tempR += hexOutput[hexPointer];
+                    hexPointer++;
+                    tempR += hexOutput[hexPointer];
+                    hexPointer++;
+                    tempG += hexOutput[hexPointer];
+                    hexPointer++;
+                    tempG += hexOutput[hexPointer];
+                    hexPointer++;
+                    tempB += hexOutput[hexPointer];
+                    hexPointer++;
+                    tempB += hexOutput[hexPointer];
+                    hexPointer++;
+
+                    imageMatrix[i][j].r = LOOKUP_TO_BYTE.at(tempR);
+                    imageMatrix[i][j].g = LOOKUP_TO_BYTE.at(tempG);
+                    imageMatrix[i][j].b = LOOKUP_TO_BYTE.at(tempB);
+                }
+            }
+
+            Image decryptedImage(1, width, height, imageMatrix, outputPath);
+            break;
+        }
+    }
+    return 0;
+}
+
+int getNumberOfBytes(std::string filePath)
+{
+    int start, end;
     std::ifstream fileReader;
     fileReader.open(filePath, std::ios::binary | std::ios::in);
     fileReader.seekg(0, std::ios::beg);
@@ -15,175 +181,4 @@ unsigned int getNumberOfBytes(std::string filePath)
     end = fileReader.tellg();
     fileReader.close();
     return (end - start);
-}
-
-/*
-    argv[] has to be an array of length 4
-    arg[0] = name of object file
-    arg[1] = path to input image
-    arg[2] = path to output image
-    arg[3] = key hexinput
-    arg[4] = task (encrypt/decrypt) (0/1)
-    arg[5] = path to binary file for decryption    
-    arg[0]'s existence is irrelevant to the main function.
-    Hence it is not extracted.
-*/
-
-int main(int argc, char** argv)
-{
-    // extracting the arguments
-    std::string input = argv[1];
-    std::string output = argv[2];
-    std::string key = argv[3];
-    std::string task = argv[4];
-
-    int formatTask = std::stoi(task);
-    
-    if(!(formatTask == 0 || formatTask == 1))
-    {
-        std::cout << "Invalid task format." << std::endl;
-        return 1;
-    }
-
-    if((int)key.length() != 64)
-    {
-        std::cout << "Invalid key provided." << std::endl;
-        return 1;
-    }
-
-    std::string hexinput;
-    Image img(input);
-    Pixel** matrix = img.getRGBMatrix();            //matrix to store the values of input image
-    unsigned int width = img.getWidth();
-    unsigned int height = img.getHeight();
-    for(unsigned int i = 0;i < height;i++)
-    {
-        for(unsigned int j = 0;j < width;j++)
-        {
-            hexinput += LOOKUP_TO_HEX[matrix[i][j].r];
-            hexinput += LOOKUP_TO_HEX[matrix[i][j].g];
-            hexinput += LOOKUP_TO_HEX[matrix[i][j].b];
-        }
-    }
-
-    if(formatTask == 1)
-    {
-        std::string filePath = argv[5];
-        std::ifstream fileReader;
-        int n = getNumberOfBytes(filePath);
-        unsigned char finalBuffer[n];
-        char tempBuffer[n];
-        fileReader.open(filePath, std::ios::binary | std::ios::in);
-        fileReader.read(tempBuffer, n);
-        fileReader.close();
-        for(int i = 0; i < n; i++)
-            finalBuffer[i] = (unsigned char)tempBuffer[i];
-        std::string IV;
-        for(unsigned int i =0;i < 16;i++)
-        {
-            IV += LOOKUP_TO_HEX[finalBuffer[i]];
-        }
-        for(unsigned int i = 16;i < n;i++)                  //add the .dat info to the input
-        {
-            hexinput +=LOOKUP_TO_HEX[finalBuffer[i]];
-        }
-        AES256 object(hexinput,key,IV,1,false);
-        std::string hexoutput = object.getHexOutput();
-
-        Pixel **outputMatrix;
-        outputMatrix = (Pixel **)malloc(height * sizeof(Pixel *));
-        for(unsigned int i = 0; i < height; i++)
-            outputMatrix[i] = (Pixel *)malloc(width * sizeof(Pixel));
-        int ptr = 0;
-        for(unsigned int i = 0;i < height;i++)
-        {
-            for(unsigned int j = 0;j < width;j++)
-            {
-                std::string outputToByteR;
-                outputToByteR = hexoutput[ptr];
-                outputToByteR += hexoutput[ptr+1];
-                ptr=ptr+2;
-                outputMatrix[i][j].r=LOOKUP_TO_BYTE.at(outputToByteR);
-                std::string outputToByteG;
-                outputToByteG = hexoutput[ptr];
-                outputToByteG += hexoutput[ptr+1];
-                ptr=ptr+2;
-                outputMatrix[i][j].g=LOOKUP_TO_BYTE.at(outputToByteG);
-                std::string outputToByteB;
-                outputToByteB = hexoutput[ptr];
-                outputToByteB += hexoutput[ptr+1];
-                ptr=ptr+2;
-                outputMatrix[i][j].b=LOOKUP_TO_BYTE.at(outputToByteB);
-            }
-        }
-        Image decryptedImg(1,width,height,outputMatrix,output);
-
-        for(unsigned int i = 0; i < height; i++)
-            free(outputMatrix[i]);
-        free(outputMatrix);
-    }
-
-    if(formatTask==0)
-    {
-        std::string IV = "00";
-
-        AES256 object(hexinput,key,IV,0,true);
-
-        std::string hexoutput = object.getHexOutput();
-
-        Pixel **outputMatrix;
-        outputMatrix = (Pixel **)malloc(height * sizeof(Pixel *));
-        for(unsigned int i = 0; i < height; i++)
-            outputMatrix[i] = (Pixel *)malloc(width * sizeof(Pixel));
-
-        int ptr = 0;
-        for(unsigned int i = 0;i < height;i++)
-        {
-            for(unsigned int j = 0;j < width;j++)
-            {
-                std::string outputToByteR;
-                outputToByteR = hexoutput[ptr];
-                outputToByteR += hexoutput[ptr+1];
-                ptr=ptr+2;
-                outputMatrix[i][j].r=LOOKUP_TO_BYTE.at(outputToByteR);
-                std::string outputToByteG;
-                outputToByteG = hexoutput[ptr];
-                outputToByteG += hexoutput[ptr+1];
-                ptr=ptr+2;
-                outputMatrix[i][j].g=LOOKUP_TO_BYTE.at(outputToByteG);
-                std::string outputToByteB;
-                outputToByteB = hexoutput[ptr];
-                outputToByteB += hexoutput[ptr+1];
-                ptr=ptr+2;
-                outputMatrix[i][j].b=LOOKUP_TO_BYTE.at(outputToByteB);
-            }
-        }
-
-        Image newEncryptedImg(1,width,height,outputMatrix,output);
-
-        for(unsigned int i = 0; i < height; i++)
-            free(outputMatrix[i]);
-        free(outputMatrix);
-
-        std::vector<unsigned char>IVByte = object.getIVBytes();
-        std::string filePath = "temp.dat";
-    
-        std::ofstream fileWriter;
-        unsigned char buffer[16+((hexoutput.length()-width*height*3)/2)];
-        for(unsigned int i=0;i<16;i++)
-        {
-            buffer[i] = IVByte[i];
-        }
-        for(unsigned int i=16; i<(hexoutput.length()-width*height*3)/2;i=i+2)
-        {
-            std::string buf;
-            buf = hexoutput[(width*height*3)+i];
-            buf +=hexoutput[(width*height*3)+i+1];
-            buffer[i]=LOOKUP_TO_BYTE.at(buf);
-        }
-        fileWriter.open(filePath, std::ios::binary | std::ios::out);
-        fileWriter.write((char *)buffer, 16+((hexoutput.length()-width*height*3)/2));
-        fileWriter.close();
-    }
-    return 0;
 }
