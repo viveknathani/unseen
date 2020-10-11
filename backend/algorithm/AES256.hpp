@@ -52,6 +52,7 @@ class AES256
         std::vector<std::vector<unsigned char>> getAllWords();
         std::vector<std::vector<unsigned char>> getAllRoundKeys();
         std::string getHexOutput();
+        std::vector<unsigned char> getIVBytes();
 };
 
 #endif
