@@ -44,4 +44,9 @@ algo_compile = "g++ algo.cpp ../algorithm/AES256.cpp -o ../bin/algo_test.o"
 print("Compiling for algo_test.o...")
 subprocess.run(algo_compile, shell=True)
 
+# prepare combine_test.o
+combine_compile = "g++ combine.cpp ../algorithm/AES256.cpp ../lib/Image.cpp -ljpeg -lpng -o ../bin/combine_test.o"
+print("Compiling for combine_test.o")
+subprocess.run(combine_compile, shell=True)
+
 print("Build Successful!")
