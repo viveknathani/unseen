@@ -368,7 +368,7 @@ std::string AES256::getHexOutput()
     return hexOutput;
 }
 
-std::vector<unsigned char> AES256::getIVBytes()
+std::vector<unsigned char> AES256::getByteIV()
 {
     return byteIV;
 }
