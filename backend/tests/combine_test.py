@@ -49,7 +49,14 @@ def produce_decrypted(image_number, image_type):
         output_file_name += (str('P') + str(image_number))
     output_file_name += '.png'    
     output_file_path = path_to_data + output_file_name
-    run_this = '../bin/./combine_test.o ' + input_file_path + ' ' + output_file_path + ' ' + hex_key + ' 1 ' + '../bin/temp.dat'
+
+    binary_file_path = path_to_data
+    if(image_type == 'jpg'):
+        binary_file_path += ('EJ' + str(image_number) + '.dat')
+    if(image_type == 'png'):
+        binary_file_path += ('EP' + str(image_number) + '.dat')    
+    run_this = '../bin/./combine_test.o ' + input_file_path + ' ' + output_file_path + ' ' + hex_key + ' 1 ' + binary_file_path
+    print(run_this)
     return run_this
 
 run_this_only = ''

@@ -105,7 +105,22 @@ int main(int argc, char** argv)
                 buffer[i] = LOOKUP_TO_BYTE.at(tempBuffer);
             }    
 
-            std::string binaryFilePath = "../bin/temp.dat";
+            std::string binaryFilePath = "";
+            int index = outputPath.length() - 1;
+            for(int i = outputPath.length() - 1; i >= 0; i--)
+            {
+                if(outputPath[i] == '.')
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            for(int i = 0; i < index; i++)
+                binaryFilePath += outputPath[i];
+
+            binaryFilePath += ".dat";    
+            
             std::ofstream fileWriter;
             fileWriter.open(binaryFilePath, std::ios::binary | std::ios::out);
             fileWriter.write((char *)buffer, bufferSize);
