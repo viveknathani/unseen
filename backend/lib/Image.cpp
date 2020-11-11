@@ -329,6 +329,7 @@ void Image::writePNG(unsigned int givenWidth, unsigned int givenHeight, Pixel **
     if (png_ptr == NULL) 
     {
         std::cout << "Could not allocate write struct." << std::endl;
+        fclose(fp);
         return ;
     }
 
@@ -337,12 +338,14 @@ void Image::writePNG(unsigned int givenWidth, unsigned int givenHeight, Pixel **
     if (info_ptr == NULL) 
     {
        std::cout << "Could not allocate info struct." << std::endl;
+       fclose(fp);
        return ;
     }
 
     if(setjmp(png_jmpbuf(png_ptr))) 
     {
       std::cout << "Error during png creation." << std::endl;
+      fclose(fp);
       return ;
     }
 
