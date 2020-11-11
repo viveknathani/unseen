@@ -1,28 +1,156 @@
-mark{
-    color:darkblue;
-    background-color: dodgerblue;
-}
-#top
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+
+body
 {
-    text-align: left;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    color: darkblue;
-    font-size: 170%;
+    font-family: 'Open Sans', sans-serif;
+    background-color: white;
+    color : black;
 }
 
-#heading
+#name 
 {
+    letter-spacing: 5px;
+}
+
+#head 
+{
+    margin-top: -1%;
+    font-weight: 900;
+}
+
+.button
+{
+    margin-top: -3.5%;
+    float: right;
+    background-color: white;
+    color: black;
+    width: 5%;
+    border: 0.5px solid green;
+    border-radius: 1%;
+}
+
+#about-button:hover
+{
+    background-color: green;
+    cursor: pointer;
+}
+
+#foot
+{
+    background-color: white;
+    color : black;
+    background-color: black;
+    color: white;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 10%;
     text-align: center;
-    font-size: 120%;
-    font-family: 'Times New Roman', Times, serif;
-    background-color: powderblue;
-    color: mediumblue;
+    font-weight: 800;
 }
 
-#credits
+#foot p 
 {
-    text-align: right;
-    font-size: 120%;
-    font-family: 'Times New Roman', Times, serif;
+    font-size: large;
+}
 
+a
+{
+    color: green;
+}
+
+a:link 
+{
+    text-decoration: none;
+}
+  
+a:visited 
+{
+    text-decoration: none;
+}
+  
+a:hover 
+{
+    text-decoration: underline;
+}
+  
+a:active 
+{
+    text-decoration: underline;
+}
+
+a i
+{
+    color: white;
+}
+
+.popup 
+{
+    display: none;
+    position: fixed;
+    padding: 10px;
+    width: 280px;
+    left: 50%;
+    margin-left: -150px;
+    height: 180px;
+    top: 50%;
+    margin-top: -100px;
+    background: #FFF;
+    border: 3px solid;
+    z-index: 20;
+}
+
+#popup:after 
+{
+    position: fixed;
+    content: "";
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: -2;
+}
+
+#popup:before 
+{
+    position: absolute;
+    content: "";
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: #FFF;
+    z-index: -1;
+}
+
+#content 
+{
+    margin-top: 5%;
+}
+
+.steps p 
+{
+    margin: 0;
+}
+
+#key
+{
+    color: green;
+}
+
+#key-button, #clear-button
+{
+    background-color: white;
+    color: black;
+    border: 0.5px solid green;
+    border-radius: 1%;
+}
+
+#key-button:hover, #clear-button:hover
+{
+    background-color: green;
+    cursor: pointer;
 }
