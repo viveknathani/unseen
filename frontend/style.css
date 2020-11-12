@@ -7,32 +7,15 @@ body
     color : black;
 }
 
-#name 
-{
-    letter-spacing: 5px;
-}
-
 #head 
 {
     margin-top: -1%;
     font-weight: 900;
 }
 
-.button
+#content 
 {
-    margin-top: -3.5%;
-    float: right;
-    background-color: white;
-    color: black;
-    width: 5%;
-    border: 0.5px solid green;
-    border-radius: 1%;
-}
-
-#about-button:hover
-{
-    background-color: green;
-    cursor: pointer;
+    margin-top: 5%;
 }
 
 #foot
@@ -41,49 +24,38 @@ body
     color : black;
     background-color: black;
     color: white;
-    position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     width: 100%;
-    height: 10%;
+    position: absolute;
     text-align: center;
     font-weight: 800;
 }
 
-#foot p 
+#name 
 {
-    font-size: large;
+    letter-spacing: 5px;
 }
 
-a
+button
 {
-    color: green;
+    background-color: white;
+    color: black;
+    border: 0.5px solid #2BAF08;
+    border-radius: 1%;
 }
 
-a:link 
+button:hover
 {
-    text-decoration: none;
-}
-  
-a:visited 
-{
-    text-decoration: none;
-}
-  
-a:hover 
-{
-    text-decoration: underline;
-}
-  
-a:active 
-{
-    text-decoration: underline;
+    background-color: #2BAF08;
+    cursor: pointer;
 }
 
-a i
+#about-button
 {
-    color: white;
+    margin-top: -3.5%;
+    float: right;
 }
 
 .popup 
@@ -126,9 +98,9 @@ a i
     z-index: -1;
 }
 
-#content 
+.select_green
 {
-    margin-top: 5%;
+    color: #2BAF08;
 }
 
 .steps p 
@@ -136,21 +108,50 @@ a i
     margin: 0;
 }
 
+#generator p 
+{
+    display: inline;
+    color: white;
+    background-color: black;
+}
+
+#foot p 
+{
+    font-size: large;
+}
+
+a
+{
+    color: #2BAF08;
+}
+
+a:link 
+{
+    text-decoration: none;
+}
+  
+a:visited 
+{
+    text-decoration: none;
+}
+  
+a:hover 
+{
+    text-decoration: underline;
+}
+  
+a:active 
+{
+    text-decoration: underline;
+}
+
+a i
+{
+    color: white;
+}
+
 #key
 {
-    color: green;
-}
-
-#key-button, #clear-button
-{
-    background-color: white;
-    color: black;
-    border: 0.5px solid green;
-    border-radius: 1%;
-}
-
-#key-button:hover, #clear-button:hover
-{
-    background-color: green;
-    cursor: pointer;
+    color: #2BAF08;
+    font-weight: bold;
 }

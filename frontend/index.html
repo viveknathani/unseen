@@ -1,65 +1,97 @@
 <!DOCTYPE html>
 
     <head>
-        <title>unseen</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" type="text/css" href="style.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         <script defer src="script.js"></script>
+        <title>unseen</title>
     </head>
 
     <body>
 
         <div id="head">
-            <h1 id="name">unseen</h1>
-            <button class="button" id="about-button" href="#" onclick="show('popup')"><h3 id="about">about</h3></button>
+            <h1 id="name">un<span class="select_green">s</span>een</h1>
+            <button id="about-button" href="#" onclick="show('popup')"><h3 id="about">about</h3></button>
         </div>
 
         <div class="popup" id="popup">
-            <p>blah blah for now</p>
+            <p>unseen lets you encrypt or decrypt images. We use the AES256 algorithm under the hood. The uploaded images are deleted from the server once the user's requirement is fulfilled.</p>
             <a href="#" onclick="hide('popup')">Close</a>
         </div>
 
         <div id="content">
-            <h3>encrypt</h3>
-            <div class="steps">
-                <p>1. Get a key of length 64 from our generator below. Save it somewhere safely.</p>
-                <p>2. Upload the image you wish to encrypt.</p>
-                <p>3. Provide the key.</p>
-                <p>4. Wait for the magic.</p>
-                <p>5. Collect your encrypted image and your .dat file!</p>
+
+            <div id="encrypt">
+                <h3><span class="select_green">en</span>crypt</h3>
+                <div class="steps">
+                    <p>1. Make a key of length 64. Use our little generator below or make your own. Allowed characters : (a-f, 0-9)</p>
+                    <p>2. Upload the image you wish to encrypt.</p>
+                    <p>3. Provide the key.</p>
+                    <p>4. Wait for the magic.</p>
+                    <p>5. Collect your encrypted image and your .dat file!</p>
+                </div>
+                <form>
+                    <input placeholder="key" id="key">
+                    <input type="file" id="imageToEncrypt">
+                    <button type="submit" onclick="collectFile()">Submit</button>
+                </form>
             </div>
+
             <br>
             <br>
+
             <hr>
+
             <br>
             <br>
-            <h3>decrypt</h3>
-            <div class="steps">
-                <p>1. Upload the image you wish to decrypt.</p>
-                <p>2. Upload the .dat file that corresponds to your image.</p>
-                <p>3. Provide your key.</p>
-                <p>4. Wait for the magic.</p>
-                <p>5. Collect your decrypted image.</p>
+
+            <div id="decrypt">
+                <h3><span class="select_green">de</span>crypt</h3>
+                <div class="steps">
+                    <p>1. Upload the image you wish to decrypt.</p>
+                    <p>2. Upload the .dat file that corresponds to your image.</p>
+                    <p>3. Provide your key.</p>
+                    <p>4. Wait for the magic.</p>
+                    <p>5. Collect your decrypted image.</p>
+                </div>
             </div>
+
             <br>
             <br>
+
             <hr>
+
             <br>
             <br>
-            <div class="generator">
-                <h3>key-generator</h3>    
+
+            <div id="generator"> 
+                <h3>key-generator</h3>  
                 <button id="key-button" onclick="printKey('key')">Get your key.</button>
                 <button id="clear-button" onclick="clearIt('key')">Clear.</button>
                 <p id="key"></p>
             </div>
+
         </div>
 
         <div id="foot">
-            <p>created by:&nbsp; 
-                <a href="https://github.com/varda0701" target="blank">Varda Desai</a> & 
-                <a href="https://github.com/viveknathani" target="blank">Vivek Nathani</a> &nbsp;&nbsp;&nbsp; source code:&nbsp; 
-                <a href="https://github.com/viveknathani/unseen" target="blank"><i class="fa fa-github" style="font-size:35px"></i></a></p>
+            <p>
+                created by:&nbsp; 
+                <a href="https://github.com/varda0701" target="blank">
+                    Varda Desai
+                </a> 
+                & 
+                <a href="https://github.com/viveknathani" target="blank">
+                    Vivek Nathani
+                </a> 
+                &nbsp;&nbsp;&nbsp;source code:&nbsp; 
+                <a href="https://github.com/viveknathani/unseen" target="blank">
+                    <i class="fa fa-github" style="font-size:35px"></i>
+                </a>
+            </p>
         </div>
+
     </body>
 
 </html>
