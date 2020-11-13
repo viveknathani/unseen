@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,21 +9,21 @@
     </head>
 
     <body>
+        <header>
+            <h1>un<span class="part_green">s</span>een</h1>
+            <button id="about" href="#" onclick="show('popup')">about</button>
+            <div id="popup">
+                <p>unseen lets you encrypt or decrypt images. We use the AES256 algorithm under the hood. The uploaded images are not stored by the server in any form after completing the requested process.</p>
+                <a href="#" onclick="hide('popup')">Close</a>
+            </div>
+        </header>
 
-        <div id="head">
-            <h1 id="name">un<span class="select_green">s</span>een</h1>
-            <button id="about-button" href="#" onclick="show('popup')"><h3 id="about">about</h3></button>
-        </div>
-
-        <div class="popup" id="popup">
-            <p>unseen lets you encrypt or decrypt images. We use the AES256 algorithm under the hood. The uploaded images are deleted from the server once the user's requirement is fulfilled.</p>
-            <a href="#" onclick="hide('popup')">Close</a>
-        </div>
-
-        <div id="content">
+        <section>
 
             <div id="encrypt">
-                <h3><span class="select_green">en</span>crypt</h3>
+
+                <h3><span class="part_green">en</span>crypt</h3>
+
                 <div class="steps">
                     <p>1. Make a key of length 64. Use our little generator below or make your own. Allowed characters : (a-f, 0-9)</p>
                     <p>2. Upload the image you wish to encrypt.</p>
@@ -32,50 +31,82 @@
                     <p>4. Wait for the magic.</p>
                     <p>5. Collect your encrypted image and your .dat file!</p>
                 </div>
-                <form>
-                    <input placeholder="key" id="key">
-                    <input type="file" id="imageToEncrypt">
-                    <button type="submit" onclick="collectFile()">Submit</button>
-                </form>
+
+                <div class="formdiv">
+                    <form>
+                        <label>
+                            Provide key :
+                        </label>    
+                            <input placeholder="key" id="key">
+                        <label>
+                            Image to encrypt :
+                        </label>     
+                            <input type="file" id="imageToEncrypt">   
+                    </form>
+                    <button type="submit" onclick="sendForEncrypt()">Submit</button>
+                </div>
+
+                <div class="server-response">
+                    <p id="p_server_en"></p>
+                    <a style="display: none;" onclick="waitAndDelete()" id="server_en_image" href="../common/output.png" download>Downlad image.</a>
+                    <a style="display: none;" id="server_en_datfile" href="../common/output.dat" download>Downlad .dat file</a>
+                </div>
+
+                <img src="img/1.jpg">
+
             </div>
 
-            <br>
-            <br>
-
-            <hr>
-
-            <br>
-            <br>
+            <br><br><br><br>
 
             <div id="decrypt">
-                <h3><span class="select_green">de</span>crypt</h3>
-                <div class="steps">
-                    <p>1. Upload the image you wish to decrypt.</p>
-                    <p>2. Upload the .dat file that corresponds to your image.</p>
-                    <p>3. Provide your key.</p>
-                    <p>4. Wait for the magic.</p>
-                    <p>5. Collect your decrypted image.</p>
-                </div>
+                
+                <div id="move_right">
+                    <h3><span class="part_green">de</span>crypt</h3>
+
+                    <div class="steps">
+                        <p>1. Upload the image you wish to decrypt.</p>
+                        <p>2. Upload the .dat file that corresponds to your image.</p>
+                        <p>3. Provide your key.</p>
+                        <p>4. Wait for the magic.</p>
+                        <p>5. Collect your decrypted image.</p>
+                    </div>
+
+                    <div class="formdiv">
+                        <form>
+                            <label>Provide key:</label>
+                            <input placeholder="key" id="key-decrypt">
+                            <label>Image to decrypt: </label>
+                            <input type="file" id="imageToDecrypt" name="image">
+                            <label>.dat file: </label>
+                            <input type="file" id="datFile">
+                        </form>
+                        <button type="submit" onclick="sendForDecrypt()">Submit</button>
+                    </div>
+
+                    <div class="server-response">
+                        <p id="p_server_de"></p>
+                        <a style="display: none;" onclick="waitAndDelete()" id="server_de_image" href="../common/output.png" download>Downlad image.</a>
+                    </div>
             </div>
 
-            <br>
-            <br>
-
-            <hr>
-
-            <br>
-            <br>
-
-            <div id="generator"> 
-                <h3>key-generator</h3>  
-                <button id="key-button" onclick="printKey('key')">Get your key.</button>
-                <button id="clear-button" onclick="clearIt('key')">Clear.</button>
-                <p id="key"></p>
+                <img src="img/2.jpg">
             </div>
 
-        </div>
+            <br><br><br><br><br>
 
-        <div id="foot">
+            <div id="generator">
+
+                <h3>key-generator</h3>
+                <button onclick="printKey('generated_key')">Get your key.</button>
+                <button onclick="clearIt('generated_key')">Clear.</button>
+                <p id="generated_key"></p>
+
+                <p id="tagline">"Not every part of your private life needs to be public."</p>
+
+            </div>
+        </section>
+
+        <footer>
             <p>
                 created by:&nbsp; 
                 <a href="https://github.com/varda0701" target="blank">
@@ -90,8 +121,6 @@
                     <i class="fa fa-github" style="font-size:35px"></i>
                 </a>
             </p>
-        </div>
-
+        </footer>
     </body>
-
 </html>
