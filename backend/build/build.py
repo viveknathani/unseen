@@ -32,6 +32,13 @@ for py_pack in data["python_packages"]:
     else:
         print("OK")   
 
+node_dependencies = "cd .. && npm install && cd build"
+subprocess.run(node_dependencies, shell=True)
+
+# prepare common folder
+if(os.path.isdir("../common") is False):
+    subprocess.run("mkdir ../common", shell=True)
+
 # prepare lib_test.o
 if(os.path.isdir("../bin") is False):
     subprocess.run("mkdir ../bin", shell=True)
