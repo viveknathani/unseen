@@ -20,9 +20,8 @@ unseen is a web application for encrypting/decrypting images. It uses a 256-bit 
 We use the [**AES256**](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) algorithm in **CBC** mode.
 ## Example
 
-    ![encryption process](https://github.com/viveknathani/unseen/blob/master/frontend/img/1.jpg)
+![encryption process](https://github.com/viveknathani/unseen/blob/master/frontend/img/1.jpg?raw=true)
+![decryption process](https://github.com/viveknathani/unseen/blob/master/frontend/img/2.jpg?raw=true)
 
-    ![decryption process](https://github.com/viveknathani/unseen/blob/master/frontend/img/2.jpg)
-    
 ## License
-[**MIT**]( ) 
+[**MIT**](https://github.com/viveknathani/unseen/blob/master/LICENSE) 
