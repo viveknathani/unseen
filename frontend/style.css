@@ -32,7 +32,17 @@ img
    display: none;
 }
 
-@media (min-width: 900px)
+@media (min-width: 1280px) and (max-width: 1440px)
+{
+    img
+    {
+        display: block;
+        height: auto;
+        width: 20%;
+    }
+}
+
+@media (min-width: 1280px)
 {
     img
     {
