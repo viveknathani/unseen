@@ -1,6 +1,6 @@
 # unseen
 ---
-unseen is a web application for encrypting/decrypting images. It uses a 256-bit key. The decryption process uses an additional _.dat file_ that contains metadata about the original state of the image. The _.dat file_ is relatively small. It stores at max 32 bits of data. The user's uploaded image is deleted from the server once the requirement is executed.
+unseen is a web application for encrypting/decrypting images. It uses a 256-bit key. The decryption process uses an additional _.dat file_ that contains metadata about the original state of the image. The _.dat file_ is relatively small. It stores at max 32 bytes of data. The user's uploaded image is deleted from the server once the requirement is executed.
 
 ## The Tech Stack
 1. C++ for the core algorithm.
