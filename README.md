@@ -9,7 +9,7 @@ unseen is a web application for encrypting/decrypting images. It uses a 256-bit 
 
 ## Build
 1. clone this repository: `$ git clone https://github.com/viveknathani/unseen.git `
-2. `$ cd unseen/build`
+2. `$ cd unseen/backend/build`
 3. `python3 build.py`
 4. `cd ..`
 5. `node index.js`
