@@ -4,6 +4,8 @@
         {"PIL": "Pillow"}
     ],
     "ubuntu_apt" : [
-        "valgrind"
+        "valgrind",
+        "libjpeg-dev",
+        "libpng-dev"
     ]
 }
